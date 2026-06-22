@@ -3,6 +3,8 @@ export interface MorphState {
     pathB: string;
     blendFactor: number; 
     easing: "linear" | "spring" | "easeInOut";
+    colorA: string;
+    colorB: string
 }
   
 export const PRESET_SHAPES = {

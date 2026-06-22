@@ -5,8 +5,11 @@ import { motion, type Transition } from "framer-motion";
 interface CanvasProps {
   path: string;
   easing: "linear" | "spring" | "easeInOut";
+  colorA: string;
+  colorB: string;
+  blendFactor: number; // to track the color mix
 }
-export default function Canvas({ path, easing }: CanvasProps) {
+export default function Canvas({ path, easing, blendFactor, colorA, colorB }: CanvasProps) {
 
   const getTransition = (): Transition => {
     switch (easing) {
@@ -32,14 +35,14 @@ export default function Canvas({ path, easing }: CanvasProps) {
       >
         <motion.path
           // Framer motion automatically animates changes to the 'd' attribute
-          animate={{ d: path }}
+          animate={{ d: path, stroke: blendFactor > 50 ? colorB : colorA }}
           transition={getTransition()}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"
           strokeLinecap="round"
           strokeLinejoin="round"
-          className="text-indigo-400"
+          style={{ stroke: blendFactor > 50 ? colorB : colorA }}
         />
       </svg>
     </div>
