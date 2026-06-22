@@ -26,7 +26,8 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${spaceMono.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${spaceMono.variable} h-full antialiased scroll-smooth`}
+      data-scroll-behavior="smooth"
     >
       {/* Ensuring min-h-screen here allows the sticky canvas 
         to work correctly across the entire page flow.
