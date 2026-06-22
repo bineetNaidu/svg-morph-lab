@@ -5,9 +5,9 @@ import { MorphState, DEFAULT_PATHS, PRESET_SHAPES } from "@/types";
 import { useMorph } from "@/hooks/useMorph";
 import Canvas from "./Canvas";
 import { animate } from "framer-motion";
-import { Play, Pause, AlertCircle } from "lucide-react";
+import { Play, Pause, AlertCircle, Upload } from "lucide-react";
 
-// --- NEW: A reusable Preset Picker Component ---
+// --- A reusable Preset Picker Component ---
 function PresetPicker({ 
   onSelect, 
   activePath 
@@ -16,23 +16,31 @@ function PresetPicker({
   activePath: string 
 }) {
   return (
-    <div className="flex flex-wrap gap-2 mt-3">
-      {Object.entries(PRESET_SHAPES).map(([name, path]) => {
-        const isActive = activePath === path;
-        return (
-          <button
-            key={name}
-            onClick={() => onSelect(path)}
-            className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-200 ${
-              isActive 
-                ? "bg-indigo-500 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]" 
-                : "glass-panel hover:bg-white/10 text-neutral-400 hover:text-white"
-            }`}
-          >
-            {name}
-          </button>
-        );
-      })}
+    <div className="space-y-3">
+      {/* Helper text */}
+      <div className="text-xs text-neutral-500">
+        Choose a preset below, or <span className="text-indigo-400 font-medium">drag & drop any SVG file</span> anywhere within the box to use your own design.
+      </div>
+
+      <div className="flex flex-wrap gap-2">
+        {Object.entries(PRESET_SHAPES).map(([name, path]) => {
+          const isActive = activePath === path;
+
+          return (
+            <button
+              key={name}
+              onClick={() => onSelect(path)}
+              className={`text-xs px-3 py-1.5 rounded-full font-medium transition-all duration-200 ${
+                isActive
+                  ? "bg-indigo-500 text-white shadow-[0_0_10px_rgba(99,102,241,0.5)]"
+                  : "glass-panel hover:bg-white/10 text-neutral-400 hover:text-white"
+              }`}
+            >
+              {name}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -47,6 +55,7 @@ export default function Playground() {
   });
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedCode, setCopiedCode] = useState<"svg" | "react" | null>(null);
+  const [draggingTarget, setDraggingTarget] = useState<"A" | "B" | null>(null);
 
   const { path: morphedPath, error: morphError } = useMorph(state.pathA, state.pathB, state.blendFactor);
 
@@ -102,6 +111,40 @@ export default function MorphingIcon() {
     setTimeout(() => setCopiedCode(null), 2000); // Reset after 2 seconds
   };
 
+  const handleDrop = async (e: React.DragEvent, target: "A" | "B") => {
+    e.preventDefault();
+    setDraggingTarget(null); // Remove the hover overlay
+
+    const file = e.dataTransfer.files[0];
+    if (!file || file.type !== "image/svg+xml") {
+      alert("Please drop a valid .svg file");
+      return;
+    }
+
+    try {
+      // Read the raw text inside the SVG file
+      const text = await file.text();
+      
+      // Use Regex to find the path data: d="..." or d='...'
+      const pathMatch = text.match(/d=(["'])(.*?)\1/);
+      
+      if (pathMatch && pathMatch[2]) {
+        // Success! Update the correct state with the extracted math
+        setState((prev) => ({
+          ...prev,
+          [target === "A" ? "pathA" : "pathB"]: pathMatch[2],
+        }));
+      } else {
+        alert("Could not find a valid <path> inside this SVG.");
+      }
+    } catch (error) {
+      console.error("Error parsing file:", error);
+    }
+  };
+
+  // Prevent default browser behavior (which is to open the file in a new tab)
+  const handleDragOver = (e: React.DragEvent) => e.preventDefault();
+
   // 4. The Auto-Play Loop Engine
   useEffect(() => {
     if (!isPlaying) return;
@@ -127,8 +170,21 @@ export default function MorphingIcon() {
       {/* LEFT COLUMN: Inputs & Controls */}
       <div className="lg:col-span-4 flex flex-col gap-6 order-2 lg:order-1">
         
-        {/* Input A */}
-        <div className="glass-panel p-6">
+       {/* --- Input A --- */}
+       <div 
+          className="glass-panel p-6 relative"
+          onDragOver={(e) => { handleDragOver(e); setDraggingTarget("A"); }}
+          onDragLeave={() => setDraggingTarget(null)}
+          onDrop={(e) => handleDrop(e, "A")}
+        >
+          {/* Glowing Drop Overlay */}
+          {draggingTarget === "A" && (
+            <div className="absolute inset-0 z-10 bg-indigo-500/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-indigo-400 flex flex-col items-center justify-center text-indigo-300 transition-all">
+              <Upload className="w-8 h-8 mb-2 animate-bounce" />
+              <span className="font-bold text-sm">Drop SVG to Extract</span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-sm uppercase tracking-widest font-semibold text-white/60">Shape A (Start)</h2>
           </div>
@@ -138,15 +194,24 @@ export default function MorphingIcon() {
             className="glass-input w-full h-24 p-4 text-sm font-mono text-indigo-300 resize-none"
             spellCheck={false}
           />
-          {/* Inject Preset Picker for A */}
-          <PresetPicker 
-            activePath={state.pathA} 
-            onSelect={(path) => setState({ ...state, pathA: path })} 
-          />
+          <PresetPicker activePath={state.pathA} onSelect={(path) => setState({ ...state, pathA: path })} />
         </div>
 
-        {/* Input B */}
-        <div className="glass-panel p-6">
+        {/* --- Input B --- */}
+        <div 
+          className="glass-panel p-6 relative"
+          onDragOver={(e) => { handleDragOver(e); setDraggingTarget("B"); }}
+          onDragLeave={() => setDraggingTarget(null)}
+          onDrop={(e) => handleDrop(e, "B")}
+        >
+          {/* Glowing Drop Overlay */}
+          {draggingTarget === "B" && (
+            <div className="absolute inset-0 z-10 bg-cyan-500/10 backdrop-blur-sm rounded-xl border-2 border-dashed border-cyan-400 flex flex-col items-center justify-center text-cyan-300 transition-all">
+              <Upload className="w-8 h-8 mb-2 animate-bounce" />
+              <span className="font-bold text-sm">Drop SVG to Extract</span>
+            </div>
+          )}
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-sm uppercase tracking-widest font-semibold text-white/60">Shape B (End)</h2>
           </div>
@@ -156,11 +221,7 @@ export default function MorphingIcon() {
             className="glass-input w-full h-24 p-4 text-sm font-mono text-cyan-300 resize-none"
             spellCheck={false}
           />
-          {/* Inject Preset Picker for B */}
-          <PresetPicker 
-            activePath={state.pathB} 
-            onSelect={(path) => setState({ ...state, pathB: path })} 
-          />
+          <PresetPicker activePath={state.pathB} onSelect={(path) => setState({ ...state, pathB: path })} />
         </div>
 
         {/* The Blender Control */}
