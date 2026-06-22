@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧪 SVG Morph Lab
 
-## Getting Started
+> An open-source, interactive playground for mathematical SVG path morphing. Blend, interpolate, and animate complex vector paths with real-time visual feedback and instant React code export.
 
-First, run the development server:
+## ✨ Features
+
+* **Mathematical Path Interpolation:** Seamlessly morph between disparate SVG paths using Flubber.
+* **Pro Code Generation:** Export results as raw `<path>` strings or production-ready React components with Framer Motion integration.
+* **Drag & Drop Parsing:** Instantly extract vector math from your `.svg` files by dropping them directly into the UI.
+* **Advanced Studio View:** * **X-Ray Mode:** Visualize and track coordinate vertices in real-time.
+* **Onion Skinning:** Debug spatial movement with 25%, 50%, and 75% ghost trails.
+
+* **Color Factory:** Native CSS `color-mix()` integration for seamless hex crossfading.
+* **Physics Sandbox:** Test Spring, Linear, and Smooth easing physics interactively.
+
+---
+
+## 🛠️ Tech Stack
+
+* **Framework:** [Next.js](https://nextjs.org/) (App Router)
+* **Language:** [TypeScript](https://www.typescriptlang.org/)
+* **Styling:** [Tailwind CSS](https://tailwindcss.com/)
+* **Animation:** [Framer Motion](https://www.framer.com/motion/)
+* **Math Engine:** [Flubber.js](https://github.com/veltman/flubber)
+
+---
+
+## 📂 File Structure (Root-Level)
+
+```text
+svg-morph-lab/
+├── app/
+│   ├── layout.tsx         # Root HTML, fonts, and global providers
+│   ├── page.tsx           # Landing page with animated hero & bento grid
+│   └── lab/               
+│       └── page.tsx       # Playground client workspace
+├── components/
+│   └── morph/             
+│       ├── Playground.tsx # Main IDE, state, and drag-and-drop logic
+│       └── Canvas.tsx     # Interpolation renderer with X-Ray & Onion skinning
+├── hooks/
+│   └── useMorph.ts        # Custom hook for flubber interpolation math
+├── types/                 
+│   └── index.ts           # Global TypeScript interfaces
+├── tailwind.config.ts     # Design tokens
+└── tsconfig.json          # Strict type-checking
+
+```
+
+---
+
+## 🚀 Getting Started
+
+1. **Clone and install:**
+
+```bash
+git clone https://github.com/bineetNaidu/svg-morph-lab.git
+cd svg-morph-lab
+npm install
+
+```
+
+2.**Run the server:**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+3.**Explore:** Open [http://localhost:3000](http://localhost:3000) and enter the lab via the `/lab` route.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🤝 Contributing
 
-## Learn More
+Contributions, issues, and feature requests are welcome! Feel free to check the [issues page](https://www.google.com/search?q=https://github.com/bineetNaidu/svg-morph-lab/issues).
 
-To learn more about Next.js, take a look at the following resources:
+1. Fork the Project
+2. Create your Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your Changes (`git commit -m 'feat: Add some AmazingFeature'`)
+4. Push to the Branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 📄 License
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+This project is open-source and available under the [MIT License](https://www.google.com/search?q=LICENSE).
