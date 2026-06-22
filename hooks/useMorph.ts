@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { interpolate } from "flubber";
 
 /**
@@ -9,15 +9,20 @@ import { interpolate } from "flubber";
  * @returns The new morphed SVG 'd' string
  */
 export function useMorph(pathA: string, pathB: string, blendFactor: number) {
+  const [error, setError] = useState<string | null>(null);
   
   // 1. Create the interpolator function. We wrap this in useMemo so it 
   // only recalculates when the user actually changes the text inputs, not during sliding.
   const interpolator = useMemo(() => {
     try {
+      // Clear any previous errors if the user fixes the typo
+      setError(null);
       // maxSegmentLength ensures smooth curves even on simple shapes
       return interpolate(pathA, pathB, { maxSegmentLength: 2 });
     } catch (error) {
       console.warn("Paths are not compatible for interpolation yet.", error);
+      console.warn("Flubber parsing error:", error);
+      setError("Paths are incompatible or contain invalid SVG syntax.");
       // Fallback to pathA if the user is currently typing an invalid path
       return () => pathA; 
     }
@@ -25,8 +30,12 @@ export function useMorph(pathA: string, pathB: string, blendFactor: number) {
 
   // 2. Generate the actual hybrid path based on the slider value (0.0 to 1.0)
   const currentPath = useMemo(() => {
-    return interpolator(blendFactor / 100);
-  }, [interpolator, blendFactor]);
+    try {
+      return interpolator(blendFactor / 100);
+    } catch (err) {
+      return pathA;
+    }
+  }, [interpolator, blendFactor, pathA]);
 
-  return currentPath;
+  return { path: currentPath, error };
 }

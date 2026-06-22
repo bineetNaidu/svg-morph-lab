@@ -5,7 +5,7 @@ import { MorphState, DEFAULT_PATHS, PRESET_SHAPES } from "@/types";
 import { useMorph } from "@/hooks/useMorph";
 import Canvas from "./Canvas";
 import { animate } from "framer-motion";
-import { Play, Pause } from "lucide-react";
+import { Play, Pause, AlertCircle } from "lucide-react";
 
 // --- NEW: A reusable Preset Picker Component ---
 function PresetPicker({ 
@@ -48,7 +48,7 @@ export default function Playground() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [copiedCode, setCopiedCode] = useState<"svg" | "react" | null>(null);
 
-  const morphedPath = useMorph(state.pathA, state.pathB, state.blendFactor);
+  const { path: morphedPath, error: morphError } = useMorph(state.pathA, state.pathB, state.blendFactor);
 
   // 🧪 NEW: The "Pro" Code Generator Function
   const generateReactComponent = () => {
@@ -218,28 +218,37 @@ export default function MorphingIcon() {
           
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none" />
 
+          {morphError && (
+            <div className="absolute top-6 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20 backdrop-blur-md text-red-400 text-sm font-medium shadow-[0_0_30px_rgba(239,68,68,0.15)] animate-in slide-in-from-top-4 fade-in duration-300">
+              <AlertCircle className="w-4 h-4" />
+              <span>{morphError}</span>
+            </div>
+          )}
+
           <Canvas path={morphedPath} easing={state.easing} />
 
           {/* Export Bar */}
-          <div className="absolute bottom-4 left-4 right-4 glass-input p-4 backdrop-blur-md flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <code className="text-xs text-neutral-400 font-mono truncate mr-4">
-              &lt;path d=&quot;{morphedPath.substring(0, 40)}...&quot; /&gt;
-            </code>
-            <div className="flex gap-2">
-              <button 
-                onClick={() => handleCopy("svg")}
-                className="text-xs glass-panel hover:bg-white/10 text-white px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
-              >
-                {copiedCode === "svg" ? "Copied!" : "Copy SVG"}
-              </button>
-              <button 
-                onClick={() => handleCopy("react")}
-                className="text-xs glass-panel bg-indigo-500! hover:bg-indigo-400! px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
-              >
-                {copiedCode === "react" ? "Copied!" : "Copy React"}
-              </button>
+          {!morphError && (
+            <div className="absolute bottom-4 left-4 right-4 glass-input p-4 backdrop-blur-md flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              <code className="text-xs text-neutral-400 font-mono truncate mr-4">
+                &lt;path d=&quot;{morphedPath.substring(0, 40)}...&quot; /&gt;
+              </code>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => handleCopy("svg")}
+                  className="text-xs glass-panel hover:bg-white/10 text-white px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
+                >
+                  {copiedCode === "svg" ? "Copied!" : "Copy SVG"}
+                </button>
+                <button 
+                  onClick={() => handleCopy("react")}
+                  className="text-xs glass-panel bg-indigo-500! hover:bg-indigo-400! px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
+                >
+                  {copiedCode === "react" ? "Copied!" : "Copy React"}
+                </button>
+              </div>
             </div>
-          </div>
+          )}
 
         </div>
       </div>
