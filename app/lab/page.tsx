@@ -19,7 +19,7 @@ export default function LabPage() {
       <div className="fixed top-[40%] left-[60%] w-[30%] h-[30%] rounded-full bg-purple-600/20 blur-[100px] pointer-events-none" />
 
       {/* Glass Navigation Bar */}
-      <nav className="border-b border-white/[0.08] bg-black/20 backdrop-blur-2xl sticky top-0 z-50">
+      <nav className="border-b border-white/8 bg-black/20 backdrop-blur-2xl sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2 drop-shadow-md">
             <span className="text-indigo-400">🧪</span> SVG Morph Lab
