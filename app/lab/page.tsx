@@ -25,7 +25,7 @@ export default function LabPage() {
             <span className="text-indigo-400">🧪</span> SVG Morph Lab
           </h1>
           <a 
-            href="https://github.com" 
+            href="https://github.com/bineetNaidu/svg-morph-lab/" 
             target="_blank" 
             rel="noreferrer"
             className="text-sm text-neutral-400 hover:text-white transition-colors"
