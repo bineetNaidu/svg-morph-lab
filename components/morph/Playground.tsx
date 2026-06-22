@@ -5,7 +5,7 @@ import { MorphState, DEFAULT_PATHS, PRESET_SHAPES } from "@/types";
 import { useMorph } from "@/hooks/useMorph";
 import Canvas from "./Canvas";
 import { animate } from "framer-motion";
-import { Play, Pause, AlertCircle, Upload } from "lucide-react";
+import { Play, Pause, AlertCircle, Upload, Layers, Eye } from "lucide-react";
 
 // --- A reusable Preset Picker Component ---
 function PresetPicker({
@@ -58,9 +58,24 @@ export default function Playground() {
   const [copiedCode, setCopiedCode] = useState<"svg" | "react" | null>(null);
   const [draggingTarget, setDraggingTarget] = useState<"A" | "B" | null>(null);
 
-  const { path: morphedPath, error: morphError } = useMorph(state.pathA, state.pathB, state.blendFactor);
+  // Advanced Studio Settings State
+  const [studioSettings, setStudioSettings] = useState({
+    showXRay: false,
+    showOnionSkin: false,
+    fillOpacity: 15,
+  });
 
-  // 🧪 NEW: The "Pro" Code Generator Function
+  const { path: morphedPath, error: morphError, interpolator } = useMorph(state.pathA, state.pathB, state.blendFactor);
+
+  // 🧅 Calculate Onion Skins (Ghost paths at 25%, 50%, 75%)
+  const onionPaths = studioSettings.showOnionSkin && !!interpolator && !morphError
+  ? [0.25, 0.5, 0.75].map(t => {
+      try { return interpolator(t); } catch { return ""; }
+    })
+  : [];
+
+
+  // 🧪 Code Generator Function
   const generateReactComponent = () => {
     // Format the physics based on their selection
     const transitionCode = state.easing === "spring"
@@ -292,6 +307,41 @@ export default function MorphingIcon() {
             </div>
           </div>
         </div>
+
+        {/* 🎛️ Advanced Studio Settings */}
+        <div className="glass-panel p-6">
+            <h2 className="text-sm uppercase tracking-widest font-semibold text-white/60 mb-4">Studio View</h2>
+            
+            <div className="flex gap-2 mb-6">
+              <button
+                onClick={() => setStudioSettings(prev => ({ ...prev, showXRay: !prev.showXRay }))}
+                className={`flex-1 flex items-center justify-center gap-2 text-xs py-2 rounded-md font-medium transition-all ${
+                  studioSettings.showXRay ? "bg-indigo-500/20 text-indigo-400 border border-indigo-500/30" : "bg-black/40 text-neutral-400 border border-white/5 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Eye className="w-4 h-4" /> X-Ray Mode
+              </button>
+              <button
+                onClick={() => setStudioSettings(prev => ({ ...prev, showOnionSkin: !prev.showOnionSkin }))}
+                className={`flex-1 flex items-center justify-center gap-2 text-xs py-2 rounded-md font-medium transition-all ${
+                  studioSettings.showOnionSkin ? "bg-cyan-500/20 text-cyan-400 border border-cyan-500/30" : "bg-black/40 text-neutral-400 border border-white/5 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <Layers className="w-4 h-4" /> Onion Skin
+              </button>
+            </div>
+
+            <div className="flex justify-between items-end mb-2">
+              <label className="text-[10px] uppercase font-bold text-white/40 block">Fill Opacity</label>
+              <span className="text-xs font-mono text-neutral-400">{studioSettings.fillOpacity}%</span>
+            </div>
+            <input
+              type="range" min="0" max="100"
+              value={studioSettings.fillOpacity}
+              onChange={(e) => setStudioSettings(prev => ({ ...prev, fillOpacity: Number(e.target.value) }))}
+              className="w-full h-1 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-white"
+            />
+          </div>
       </div>
 
       {/* RIGHT COLUMN: The Output Canvas */}
@@ -313,6 +363,10 @@ export default function MorphingIcon() {
             blendFactor={state.blendFactor}
             colorA={state.colorA}
             colorB={state.colorB}
+            showXRay={studioSettings.showXRay}
+            showOnionSkin={studioSettings.showOnionSkin}
+            fillOpacity={studioSettings.fillOpacity}
+            onionPaths={onionPaths}
           />
 
           {/* Export Bar */}

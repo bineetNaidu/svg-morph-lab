@@ -37,5 +37,5 @@ export function useMorph(pathA: string, pathB: string, blendFactor: number) {
     }
   }, [interpolator, blendFactor, pathA]);
 
-  return { path: currentPath, error };
+  return { path: currentPath, error, interpolator };
 }
