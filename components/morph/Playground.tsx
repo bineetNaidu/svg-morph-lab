@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { MorphState, DEFAULT_PATHS, PRESET_SHAPES } from "@/types";
 import { useMorph } from "@/hooks/useMorph";
 import Canvas from "./Canvas";
+import { animate } from "framer-motion";
+import { Play, Pause } from "lucide-react";
 
 // --- NEW: A reusable Preset Picker Component ---
 function PresetPicker({ 
@@ -43,8 +45,28 @@ export default function Playground() {
     blendFactor: 50,
     easing: "spring",
   });
+  const [isPlaying, setIsPlaying] = useState(false);
 
   const morphedPath = useMorph(state.pathA, state.pathB, state.blendFactor);
+
+  // 4. The Auto-Play Loop Engine
+  useEffect(() => {
+    if (!isPlaying) return;
+
+    // This forces the blend factor to animate from 0 to 100, then reverse forever
+    const controls = animate(0, 100, {
+      duration: 1.5,
+      repeat: Infinity,
+      repeatType: "reverse",
+      ease: "easeInOut",
+      onUpdate: (latest) => {
+        setState((prev) => ({ ...prev, blendFactor: Math.round(latest) }));
+      },
+    });
+
+    // Cleanup when paused
+    return () => controls.stop();
+  }, [isPlaying]);
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -90,9 +112,23 @@ export default function Playground() {
 
         {/* The Blender Control */}
         <div className="glass-panel p-6">
-          <div className="flex justify-between items-end mb-4">
+        <div className="flex justify-between items-end mb-4">
             <h2 className="text-sm uppercase tracking-widest font-semibold text-white/60">Blend Factor</h2>
-            <span className="text-xl font-bold text-white">{state.blendFactor}%</span>
+            
+            {/* 5. Add the Play/Pause Button next to the percentage! */}
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setIsPlaying(!isPlaying)}
+                className={`p-2 rounded-full transition-all ${
+                  isPlaying 
+                    ? "bg-indigo-500/20 text-indigo-400 shadow-[0_0_15px_rgba(99,102,241,0.4)]" 
+                    : "bg-white/5 text-white hover:bg-white/10"
+                }`}
+              >
+                {isPlaying ? <Pause className="w-4 h-4 fill-current" /> : <Play className="w-4 h-4 fill-current ml-0.5" />}
+              </button>
+              <span className="text-xl font-bold text-white w-12 text-right">{state.blendFactor}%</span>
+            </div>
           </div>
           
           <input
