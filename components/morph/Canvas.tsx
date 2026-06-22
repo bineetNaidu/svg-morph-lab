@@ -1,12 +1,26 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion, type Transition } from "framer-motion";
 
 interface CanvasProps {
   path: string;
+  easing: "linear" | "spring" | "easeInOut";
 }
+export default function Canvas({ path, easing }: CanvasProps) {
 
-export default function Canvas({ path }: CanvasProps) {
+  const getTransition = (): Transition => {
+    switch (easing) {
+      case "spring":
+        return { type: "spring", bounce: 0.5, duration: 0.8 };
+      case "easeInOut":
+        return { type: "tween", ease: "easeInOut", duration: 0.6 };
+      case "linear":
+        return { type: "tween", ease: "linear", duration: 0.4 };
+      default:
+        return { type: "spring", bounce: 0.2, duration: 0.6 };
+    }
+  };
+
   return (
     <div className="w-full h-full flex items-center justify-center p-8">
       {/* The viewBox 0 0 100 100 allows our default shapes 
@@ -19,7 +33,7 @@ export default function Canvas({ path }: CanvasProps) {
         <motion.path
           // Framer motion automatically animates changes to the 'd' attribute
           animate={{ d: path }}
-          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+          transition={getTransition()}
           fill="none"
           stroke="currentColor"
           strokeWidth="1.5"

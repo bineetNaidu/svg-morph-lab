@@ -101,8 +101,25 @@ export default function Playground() {
             max="100"
             value={state.blendFactor}
             onChange={(e) => setState({ ...state, blendFactor: Number(e.target.value) })}
-            className="w-full h-2 bg-black/50 rounded-lg appearance-none cursor-pointer accent-indigo-500"
+            className="w-full h-2 bg-zinc-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
           />
+          
+          <h2 className="text-sm uppercase tracking-widest font-semibold text-white/60 mb-3 mt-4">Animation Physics</h2>
+          <div className="flex p-1 bg-black/40 border border-white/5 rounded-lg shadow-inner">
+            {(["spring", "easeInOut", "linear"] as const).map((type) => (
+              <button
+                key={type}
+                onClick={() => setState({ ...state, easing: type })}
+                className={`flex-1 text-xs py-2 rounded-md font-medium capitalize transition-all ${
+                  state.easing === type
+                    ? "bg-white/8 text-white shadow-sm border border-white/5"
+                    : "text-neutral-500 hover:text-white/70 hover:bg-white/2"
+                }`}
+              >
+                {type === "easeInOut" ? "Smooth" : type}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -112,7 +129,7 @@ export default function Playground() {
           
           <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-size-[32px_32px] pointer-events-none" />
 
-          <Canvas path={morphedPath} />
+          <Canvas path={morphedPath} easing={state.easing} />
 
           {/* Export Bar */}
           <div className="absolute bottom-4 left-4 right-4 glass-input p-4 backdrop-blur-md flex items-center justify-between opacity-0 group-hover:opacity-100 transition-opacity duration-300">
