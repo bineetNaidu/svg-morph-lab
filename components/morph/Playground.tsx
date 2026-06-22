@@ -46,8 +46,61 @@ export default function Playground() {
     easing: "spring",
   });
   const [isPlaying, setIsPlaying] = useState(false);
+  const [copiedCode, setCopiedCode] = useState<"svg" | "react" | null>(null);
 
   const morphedPath = useMorph(state.pathA, state.pathB, state.blendFactor);
+
+  // 🧪 NEW: The "Pro" Code Generator Function
+  const generateReactComponent = () => {
+    // Format the physics based on their selection
+    const transitionCode = state.easing === "spring" 
+      ? `transition={{ type: "spring", bounce: 0.5, duration: 0.8 }}`
+      : state.easing === "linear"
+      ? `transition={{ type: "tween", ease: "linear", duration: 0.4 }}`
+      : `transition={{ type: "tween", ease: "easeInOut", duration: 0.6 }}`;
+
+    return `"use client";
+
+import { useState } from "react";
+import { motion } from "framer-motion";
+import { interpolate } from "flubber"; // npm install flubber
+
+export default function MorphingIcon() {
+  const [isToggled, setIsToggled] = useState(false);
+
+  // Calculate the path dynamically using Flubber (handles dissimilar paths)
+  const path = interpolate(
+    "${state.pathA}", // Shape A
+    "${state.pathB}", // Shape B
+    { maxSegmentLength: 2 }
+  )(isToggled ? 1 : 0);
+
+  return (
+    <svg 
+      viewBox="0 0 100 100" 
+      className="w-12 h-12 cursor-pointer text-indigo-400"
+      onClick={() => setIsToggled(!isToggled)}
+    >
+      <motion.path
+        animate={{ d: path }}
+        ${transitionCode}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}`;
+  };
+
+  const handleCopy = (type: "svg" | "react") => {
+    const textToCopy = type === "svg" ? `<path d="${morphedPath}" />` : generateReactComponent();
+    navigator.clipboard.writeText(textToCopy);
+    setCopiedCode(type);
+    setTimeout(() => setCopiedCode(null), 2000); // Reset after 2 seconds
+  };
 
   // 4. The Auto-Play Loop Engine
   useEffect(() => {
@@ -172,12 +225,20 @@ export default function Playground() {
             <code className="text-xs text-neutral-400 font-mono truncate mr-4">
               &lt;path d=&quot;{morphedPath.substring(0, 40)}...&quot; /&gt;
             </code>
-            <button 
-              onClick={() => navigator.clipboard.writeText(morphedPath)}
-              className="text-xs bg-white text-black px-4 py-2 rounded-md font-bold hover:bg-neutral-200 transition-colors"
-            >
-              Copy SVG
-            </button>
+            <div className="flex gap-2">
+              <button 
+                onClick={() => handleCopy("svg")}
+                className="text-xs glass-panel hover:bg-white/10 text-white px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
+              >
+                {copiedCode === "svg" ? "Copied!" : "Copy SVG"}
+              </button>
+              <button 
+                onClick={() => handleCopy("react")}
+                className="text-xs glass-panel bg-indigo-500! hover:bg-indigo-400! px-4 py-2 rounded-md font-medium transition-colors w-24 text-center"
+              >
+                {copiedCode === "react" ? "Copied!" : "Copy React"}
+              </button>
+            </div>
           </div>
 
         </div>
